@@ -1,1 +1,31 @@
+---
+- name: Clone and Resize VM
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get the last VM ID
+      command: "qm list --full | awk '{last=$1} END {print last}'"
+      register: last_vm_id
+
+    - name: Add 1 to the last VM ID
+      set_fact:
+        new_vm_id: "{{ last_vm_id.stdout | int + 1 }}"
+
+    - name: Display the new VM ID
+      debug:
+        var: new_vm_id
+
+    - name: Clone VM with ID 902
+      command: "qm clone 902 {{ new_vm_id }} -name Ubuntu.{{ new_vm_id }} -full -storage Data -format raw"
+
+    - name: Resize the cloned VM's disk
+      command: "qm resize {{ new_vm_id }} scsi0 30G"
+
+    # Add more tasks if needed
+
+    # Unset the variables (optional)
+    - name: Unset variables
+      set_fact:
+        last_vm_id: null
+        new_vm_id: null
 
